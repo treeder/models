@@ -42,9 +42,9 @@ function parseProp(val, p, sub = false) {
   }
   switch (p.type) {
     case Number:
-      return new Number(val)
+      return Number(val)
     case Boolean:
-      return val == 1
+      return Boolean(val)
     case Date:
       return new Date(val)
     case BigInt:
@@ -59,7 +59,7 @@ function parseProp(val, p, sub = false) {
         for (const subProp in p) {
           // console.log("subProp:", subProp)
           // console.log(v)
-          v[subProp] = this.parseProp(v[subProp], p[subProp], true)
+          v[subProp] = parseProp(v[subProp], p[subProp], true)
           // console.log('after:', v)
         }
         return v
