@@ -17,9 +17,9 @@ npm install treeder/models
 
 Or in your browser:
 
+```js
+import {parseModel} from 'https://cdn.jsdelivr.net/gh/treeder/models@1/index.js'
 ```
-import {parseModel} from 'https://cdn.jsdelivr.net/gh/treeder/models@0/index.js'
-
 
 First define your models. You may find this familiar if you use [Lit](https://lit.dev). And these models can be used for [migrations](https://github.com/treeder/migrations), for SQLite and Cloudflare D1 via [flaregun](https://github.com/treeder/flaregun), and for the handy [api](https://github.com/treeder/api) library. 
 
