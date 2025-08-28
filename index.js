@@ -1,4 +1,6 @@
 export function parseModel(obj, clz) {
+  if (!obj) return
+  if (!clz) return
   if (Array.isArray(obj)) {
     for (let ob of obj) {
       parseProperties(ob, clz)
