@@ -1,17 +1,24 @@
-export function parseModel(obj, clz) {
+/**
+ * 
+ * @param {*} obj the object to parse
+ * @param {*} clz the models with `properties` defined
+ * @param {*} options 
+ * @returns 
+ */
+export function parseModel(obj, clz, options = {}) {
   if (!obj) return
   if (!clz) return
   if (Array.isArray(obj)) {
     for (let ob of obj) {
-      parseProperties(ob, clz)
+      parseProperties(ob, clz, options)
     }
   } else {
-    parseProperties(obj, clz)
+    parseProperties(obj, clz, options)
   }
   return obj
 }
 
-function parseProperties(ob, clz) {
+function parseProperties(ob, clz, options) {
   if (!ob) return
   if (!clz) return
   if (clz.properties) {
@@ -20,7 +27,7 @@ function parseProperties(ob, clz) {
       // console.log("prop:", propName, val)
       if (!val) continue
       let prop = clz.properties[propName]
-      ob[propName] = parseProp(val, prop)
+      ob[propName] = parseProp(val, prop, options)
     }
   } else {
     // the object might be wrapped, so go deeper
@@ -29,12 +36,12 @@ function parseProperties(ob, clz) {
       // console.log("wrap prop:", propName, val)
       if (!val) continue
       let prop = clz[propName]
-      parseProperties(val, prop)
+      parseProperties(val, prop, options)
     }
   }
 }
 
-function parseProp(val, p, sub = false) {
+function parseProp(val, p, options = {}) {
   if (!val || !p) return val
   if (p.parse) {
     // custom parse function
@@ -49,27 +56,24 @@ function parseProp(val, p, sub = false) {
       return new Date(val)
     case BigInt:
       return BigInt(val)
+    case Object:
+    case JSON:
+      let v = val
+      if (options.parseJSON) {
+        // Only parse JSON if this is the top level and hasn't been parsed before. 
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        v = JSON.parse(val)
+      }
+      // check if there are any sub fields we need to parse
+      for (const subProp in p) {
+        // console.log("subProp:", subProp), v)
+        v[subProp] = parseProp(v[subProp], p[subProp], { parseJSON: false })
+        // console.log('after:', v)
+      }
+      return v
+    case Array:
+      return JSON.parse(val)
+    default:
+      return val
   }
-  if (!sub) {
-    // then parse JSON objects
-    switch (p.type) {
-      case Object:
-        let v = JSON.parse(val)
-        // check if there are any sub fields we need to parse
-        for (const subProp in p) {
-          // console.log("subProp:", subProp)
-          // console.log(v)
-          v[subProp] = parseProp(v[subProp], p[subProp], true)
-          // console.log('after:', v)
-        }
-        return v
-      case JSON:
-        return JSON.parse(val)
-      case Array:
-        return JSON.parse(val)
-      default:
-        return val
-    }
-  }
-
 }
