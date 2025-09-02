@@ -3,6 +3,7 @@
  * @param {*} obj the object to parse
  * @param {*} clz the models with `properties` defined
  * @param {*} options 
+ * @param {boolean} options.parseJSON: boolean - whether to parse JSON fields. Default false.
  * @returns 
  */
 export function parseModel(obj, clz, options = {}) {
