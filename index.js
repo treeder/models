@@ -7,8 +7,8 @@
  * @returns 
  */
 export function parseModel(obj, clz, options = {}) {
-  if (!obj) return
-  if (!clz) return
+  if (!obj) return obj
+  if (!clz) return obj
   if (Array.isArray(obj)) {
     for (let ob of obj) {
       parseProperties(ob, clz, options)
