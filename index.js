@@ -73,7 +73,14 @@ function parseProp(val, p, options = {}) {
       }
       return v
     case Array:
-      return JSON.parse(val)
+      let v2 = val
+      if (options.parseJSON) {
+        // Only parse JSON if this is the top level and hasn't been parsed before. 
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        v2 = JSON.parse(val)
+      }
+      // todo: parse each object if there are some property definitions for arrays. 
+      return v2
     default:
       return val
   }
