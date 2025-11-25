@@ -1,10 +1,10 @@
 /**
- * 
+ *
  * @param {*} obj the object to parse
  * @param {*} clz the models with `properties` defined
- * @param {object} options 
+ * @param {object} options
  * @param {boolean} [options.parseJSON] whether to parse JSON fields. Default false.
- * @returns 
+ * @returns
  */
 export function parseModel(obj, clz, options = {}) {
   if (!obj) return obj
@@ -40,6 +40,7 @@ function parseProperties(ob, clz, options) {
       parseProperties(val, prop, options)
     }
   }
+  return ob
 }
 
 function parseProp(val, p, options = {}) {
@@ -61,8 +62,8 @@ function parseProp(val, p, options = {}) {
     case JSON:
       let v = val
       if (options.parseJSON) {
-        // Only parse JSON if this is the top level and hasn't been parsed before. 
-        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        // Only parse JSON if this is the top level and hasn't been parsed before.
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v = JSON.parse(val)
       }
       // check if there are any sub fields we need to parse
@@ -73,13 +74,24 @@ function parseProp(val, p, options = {}) {
       }
       return v
     case Array:
+      // console.log('array:', val, p)
       let v2 = val
       if (options.parseJSON) {
-        // Only parse JSON if this is the top level and hasn't been parsed before. 
-        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        // Only parse JSON if this is the top level and hasn't been parsed before.
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v2 = JSON.parse(val)
       }
-      // todo: parse each object if there are some property definitions for arrays. 
+      if (Array.isArray(v2)) {
+        for (let i = 0; i < v2.length; i++) {
+          let v3 = v2[i]
+          for (const subProp in p) {
+            // console.log("subProp:", subProp), v)
+            v3[subProp] = parseProp(v3[subProp], p[subProp], { parseJSON: false })
+            // console.log('after:', v)
+          }
+          v2[i] = v3
+        }
+      }
       return v2
     default:
       return val
