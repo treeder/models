@@ -74,7 +74,6 @@ function parseProp(val, p, options = {}) {
       }
       return v
     case Array:
-      // console.log('array:', val, p)
       let v2 = val
       if (options.parseJSON) {
         // Only parse JSON if this is the top level and hasn't been parsed before.
@@ -82,14 +81,16 @@ function parseProp(val, p, options = {}) {
         v2 = JSON.parse(val)
       }
       if (Array.isArray(v2)) {
-        for (let i = 0; i < v2.length; i++) {
-          let v3 = v2[i]
-          for (const subProp in p) {
-            // console.log("subProp:", subProp), v)
-            v3[subProp] = parseProp(v3[subProp], p[subProp], { parseJSON: false })
-            // console.log('after:', v)
+        for (const item of v2) {
+          if (typeof item !== 'object' || item === null) {
+            continue
           }
-          v2[i] = v3
+          for (const subProp in p) {
+            if (subProp === 'type' || subProp === 'parse') {
+              continue
+            }
+            item[subProp] = parseProp(item[subProp], p[subProp], { parseJSON: false })
+          }
         }
       }
       return v2
