@@ -1,10 +1,10 @@
 /**
- * 
+ *
  * @param {*} obj the object to parse
  * @param {*} clz the models with `properties` defined
- * @param {object} options 
+ * @param {object} options
  * @param {boolean} [options.parseJSON] whether to parse JSON fields. Default false.
- * @returns 
+ * @returns
  */
 export function parseModel(obj, clz, options = {}) {
   if (!obj) return obj
@@ -40,6 +40,7 @@ function parseProperties(ob, clz, options) {
       parseProperties(val, prop, options)
     }
   }
+  return ob
 }
 
 function parseProp(val, p, options = {}) {
@@ -61,8 +62,8 @@ function parseProp(val, p, options = {}) {
     case JSON:
       let v = val
       if (options.parseJSON) {
-        // Only parse JSON if this is the top level and hasn't been parsed before. 
-        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        // Only parse JSON if this is the top level and hasn't been parsed before.
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v = JSON.parse(val)
       }
       // check if there are any sub fields we need to parse
@@ -75,11 +76,23 @@ function parseProp(val, p, options = {}) {
     case Array:
       let v2 = val
       if (options.parseJSON) {
-        // Only parse JSON if this is the top level and hasn't been parsed before. 
-        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be. 
+        // Only parse JSON if this is the top level and hasn't been parsed before.
+        // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v2 = JSON.parse(val)
       }
-      // todo: parse each object if there are some property definitions for arrays. 
+      if (Array.isArray(v2)) {
+        for (const item of v2) {
+          if (typeof item !== 'object' || item === null) {
+            continue
+          }
+          for (const subProp in p) {
+            if (subProp === 'type' || subProp === 'parse') {
+              continue
+            }
+            item[subProp] = parseProp(item[subProp], p[subProp], { parseJSON: false })
+          }
+        }
+      }
       return v2
     default:
       return val
