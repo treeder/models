@@ -69,8 +69,10 @@ function parseProp(val, p, options = {}) {
       // check if there are any sub fields we need to parse
       for (const subProp in p) {
         // console.log("subProp:", subProp), v)
-        v[subProp] = parseProp(v[subProp], p[subProp], { parseJSON: false })
-        // console.log('after:', v)
+        if(v){
+          v[subProp] = parseProp(v[subProp], p[subProp], { parseJSON: false })
+          // console.log('after:', v)
+        }
       }
       return v
     case Array:
