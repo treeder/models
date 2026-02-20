@@ -1,6 +1,6 @@
 {
   "name": "models",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "type": "module",
   "description": "A secondary JSON parser to turn fields into concrete objects.",
   "main": "index.js",
