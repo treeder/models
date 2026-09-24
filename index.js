@@ -71,7 +71,7 @@ function parseProp(val, p, options = {}) {
         if (subProp === 'type' || subProp === 'parse') {
           continue
         }
-        if (v && v[subProp] !== undefined) {
+        if (typeof v === 'object' && v !== null && v[subProp] !== undefined) {
           v[subProp] = parseProp(v[subProp], p[subProp], { parseJSON: false })
         }
       }

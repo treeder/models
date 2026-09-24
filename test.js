@@ -113,3 +113,30 @@ test('validate - validates object types against schema', () => {
   assert.doesNotThrow(() => validate({ name: 'test', count: 5 }, Clz))
   assert.throws(() => validate({ name: 'test', count: 'not a number' }, Clz))
 })
+
+test('parseModel - handles primitive or null values for Object/JSON fields with sub-properties', () => {
+  const Clz = {
+    properties: {
+      data: {
+        type: Object,
+        length: { type: Number },
+      },
+    },
+  }
+
+  assert.doesNotThrow(() => {
+    const parsed = parseModel({ data: 'hello' }, Clz)
+    assert.strictEqual(parsed.data, 'hello')
+  })
+
+  assert.doesNotThrow(() => {
+    const parsed = parseModel({ data: 123 }, Clz)
+    assert.strictEqual(parsed.data, 123)
+  })
+
+  assert.doesNotThrow(() => {
+    const parsed = parseModel({ data: null }, Clz)
+    assert.strictEqual(parsed.data, null)
+  })
+})
+
