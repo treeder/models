@@ -4,7 +4,7 @@ on:
   pull_request:
     # types: [opened]
     branches:
-      - v3
+      - main
     # Optional: restrict trigger paths (supports inclusions & exclusions)
     # paths:
     #   - 'src/**'
@@ -15,20 +15,25 @@ on:
 
 jobs:
   review:
-    # Run on PR opened, OR on issue comment starting with /gemini-review by repo owners/members
+    # Run on PR opened/updated, OR on issue comment starting with /gemini-review or /gemini_review by repo owners/members
     if: |
-      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (
         github.event_name == 'issue_comment' &&
         github.event.issue.pull_request &&
-        startsWith(github.event.comment.body, '/gemini-review') &&
+        (startsWith(github.event.comment.body, '/gemini-review') || startsWith(github.event.comment.body, '/gemini_review')) &&
         contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
       )
     runs-on: ubuntu-latest
+    concurrency:
+      group: gemini-review-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
       issues: write
+      statuses: write
+      checks: write
 
     steps:
       - name: Checkout repository
