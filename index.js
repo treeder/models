@@ -61,23 +61,24 @@ function parseProp(val, p, options = {}) {
     case Object:
     case JSON:
       let v = val
-      if (options.parseJSON) {
+      if (options.parseJSON && typeof val === 'string') {
         // Only parse JSON if this is the top level and hasn't been parsed before.
         // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v = JSON.parse(val)
       }
       // check if there are any sub fields we need to parse
       for (const subProp in p) {
-        // console.log("subProp:", subProp), v)
-        if(v){
+        if (subProp === 'type' || subProp === 'parse') {
+          continue
+        }
+        if (typeof v === 'object' && v !== null && v[subProp] !== undefined) {
           v[subProp] = parseProp(v[subProp], p[subProp], { parseJSON: false })
-          // console.log('after:', v)
         }
       }
       return v
     case Array:
       let v2 = val
-      if (options.parseJSON) {
+      if (options.parseJSON && typeof val === 'string') {
         // Only parse JSON if this is the top level and hasn't been parsed before.
         // Eg: SQLite or D1 wouldn't be parsed yet, but getting from an API or elsewhere already would be.
         v2 = JSON.parse(val)
@@ -91,7 +92,9 @@ function parseProp(val, p, options = {}) {
             if (subProp === 'type' || subProp === 'parse') {
               continue
             }
-            item[subProp] = parseProp(item[subProp], p[subProp], { parseJSON: false })
+            if (item[subProp] !== undefined) {
+              item[subProp] = parseProp(item[subProp], p[subProp], { parseJSON: false })
+            }
           }
         }
       }
